@@ -3,6 +3,12 @@ variable "name" {
   description = "VM name"
 }
 
+variable "description" {
+  type        = string
+  description = "VM description"
+  default     = null
+}
+
 variable "subnet_name" {
   type        = string
   description = "Name of the subnet to use"
@@ -20,11 +26,13 @@ variable "machine_type" {
 variable "region" {
   type        = string
   description = "Compute region"
+  default     = null
 }
 
-variable "zone" {
-  type        = string
-  description = "Compute zone"
+variable "zone_index" {
+  type     = number
+  default  = 0
+  nullable = false
 }
 
 variable "disk_size" {
@@ -76,11 +84,12 @@ variable "external_access_ip_whitelist" {
 
 variable "extra_disks" {
   type = list(object({
-    name     = string
-    zone     = string
-    type     = optional(string, "pd-ssd")
-    size     = optional(number, 50)
-    snapshot = optional(string, null)
+    name        = string
+    description = optional(string, null)
+    type        = optional(string, "pd-ssd")
+    size        = optional(number, 50)
+    snapshot    = optional(string, null)
+    labels      = optional(map(string), null)
   }))
 
   description = "(Optional) List of additional disks to attach to the instance"
@@ -97,27 +106,21 @@ variable "metadata_startup_script" {
 variable "metadata" {
   type        = map(string)
   description = "(Optional) Set the `metadata` attribute on the `google_compute_instance` resource"
-  default     = null
+  default     = {}
+  nullable    = false
+}
+
+variable "ssh_keys" {
+  type        = string
+  description = "(Optional) Allowed SSH keys formatted as a newline separated list"
+  nullable    = false
+  default     = ""
 }
 
 variable "assign_external_ip" {
   type        = bool
   description = "(Optional) Whether to assign an external IP address to the instance"
   default     = false
-  nullable    = false
-}
-
-variable "image_project" {
-  type        = string
-  description = "(Optional) Project containing the VM image"
-  default     = "ubuntu-os-cloud"
-  nullable    = false
-}
-
-variable "image_family" {
-  type        = string
-  description = "(Optional) VM image family"
-  default     = "ubuntu-2404-lts"
   nullable    = false
 }
 
@@ -143,6 +146,15 @@ variable "service_account_default_roles" {
     "roles/monitoring.metricWriter",
     "roles/cloudtrace.agent",
   ]
+
+  nullable = false
+}
+
+variable "service_account_roles" {
+  type        = list(string)
+  description = "Default IAM roles to assign to the VM service account"
+  default     = []
+
   nullable = false
 }
 
@@ -174,3 +186,13 @@ variable "service_account_email" {
   nullable    = false
 }
 
+variable "architecture" {
+  type        = string
+  description = "CPU architecture"
+  default     = "amd64"
+  nullable    = false
+  validation {
+    condition     = contains(["amd64", "arm64"], var.architecture)
+    error_message = "Architecture must be either 'amd64' or 'arm64'."
+  }
+}

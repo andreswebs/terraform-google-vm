@@ -1,14 +1,13 @@
-
 resource "google_compute_address" "ext" {
   count        = var.assign_external_ip ? 1 : 0
   name         = local.external_ip_name
-  region       = local.region
+  region       = var.region
   address_type = "EXTERNAL"
 }
 
 resource "google_compute_address" "int" {
   name         = local.internal_ip_name
-  region       = local.region
+  region       = var.region
   subnetwork   = data.google_compute_subnetwork.this.id
   address_type = "INTERNAL"
 }
@@ -16,31 +15,33 @@ resource "google_compute_address" "int" {
 resource "google_compute_disk" "this" {
   for_each = local.extra_disks
 
-  name = each.value.name
-  type = each.value.type
-  zone = each.value.zone
-  size = each.value.size
-
-  snapshot = each.value.snapshot
+  architecture = var.architecture
+  name         = each.value.name
+  description  = each.value.description
+  type         = each.value.type
+  size         = each.value.size
+  labels       = each.value.labels
+  snapshot     = each.value.snapshot
+  zone         = local.zone
 
   lifecycle {
     ignore_changes = [
       snapshot
     ]
   }
-
 }
 
 resource "google_compute_instance" "this" {
   name         = var.name
+  description  = var.description
   machine_type = var.machine_type
-  zone         = var.zone
+  zone         = local.zone
   hostname     = local.hostname
 
   tags = compact(concat([var.name], var.network_tags))
 
   metadata_startup_script = var.metadata_startup_script
-  metadata                = var.metadata
+  metadata                = local.metadata
 
   boot_disk {
     initialize_params {

@@ -1,15 +1,18 @@
-data "google_compute_zone" "this" {
-  name = var.zone
+data "google_project" "this" {}
+
+data "google_compute_zones" "available" {
+  region = var.region
 }
 
 data "google_compute_subnetwork" "this" {
   name   = var.subnet_name
-  region = local.region
+  region = var.region
 }
 
 data "google_compute_image" "this" {
-  project = var.image_project
-  family  = var.image_family
+  count   = var.initial_disk_image == "" ? 1 : 0
+  project = local.default_image_project
+  family  = local.default_image_family
 }
 
 data "google_service_account" "this" {

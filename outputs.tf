@@ -4,7 +4,7 @@ output "instance" {
 }
 
 output "service_account" {
-  value       = google_service_account.this
+  value       = local.service_account
   description = "The `google_service_account` resource"
 }
 
@@ -14,7 +14,7 @@ output "internal_ip" {
 }
 
 output "external_ip" {
-  value       = try(google_compute_address.ext.address, null)
+  value       = try(google_compute_address.ext[0].address, null)
   description = "Instance external IP"
 }
 

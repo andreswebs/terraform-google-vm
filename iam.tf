@@ -6,8 +6,8 @@ resource "google_service_account" "this" {
 }
 
 resource "google_project_iam_member" "this" {
-  for_each = toset(var.service_account_default_roles)
+  for_each = toset(local.service_account_roles)
   project  = data.google_project.this.project_id
   role     = each.key
-  member   = google_service_account.this.member
+  member   = local.service_account.member
 }
