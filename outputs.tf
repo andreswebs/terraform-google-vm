@@ -1,0 +1,24 @@
+output "instance" {
+  value       = google_compute_instance.this
+  description = "The `google_compute_instance` resource"
+}
+
+output "service_account" {
+  value       = google_service_account.this
+  description = "The `google_service_account` resource"
+}
+
+output "internal_ip" {
+  value       = google_compute_address.int.address
+  description = "Instance internal IP"
+}
+
+output "external_ip" {
+  value       = try(google_compute_address.ext.address, null)
+  description = "Instance external IP"
+}
+
+output "hostname" {
+  value       = google_compute_instance.this.hostname
+  description = "Instance hostname"
+}
